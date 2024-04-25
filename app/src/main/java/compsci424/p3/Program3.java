@@ -17,6 +17,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Scanner;
 
 /**
  * Main class for this program. To help you get started, the major
@@ -39,10 +40,19 @@ public class Program3 {
      * top-level directory of this repository.
      * - For Test Case 1, use "424-p3-test1.txt".
      * - For Test Case 2, use "424-p3-test2.txt".
+     * 
      */
+    int[][] need;
     public static void main(String[] args) {
         // Code to test command-line argument processing.
         // You can keep, modify, or remove this. It's not required.
+
+        args[0] = "manual";
+        //args[0] = "auto";
+
+        args[1] = "424-p3-test1.txt";
+        //args[1] = "424-p3-test2.txt";
+
         if (args.length < 2) {
             System.err.println("Not enough command-line arguments provided, exiting.");
             return;
@@ -53,6 +63,13 @@ public class Program3 {
         // 1. Open the setup file using the path in args[1]
         String currentLine;
         BufferedReader setupFileReader;
+        int[] available;
+        int[][] max;
+        int[][] allocation;
+        
+
+
+
         try {
             setupFileReader = new BufferedReader(new FileReader(args[1]));
         } catch (FileNotFoundException e) {
@@ -96,6 +113,58 @@ public class Program3 {
             // Create the Banker's Algorithm data structures, in any
             // way you like as long as they have the correct size
 
+            max = new int[numProcesses][numResources];
+            available = new int[numResources];
+            allocation = new int[numProcesses][numResources];
+            
+            currentLine = setupFileReader.readLine();
+            System.out.println(currentLine);
+
+            currentLine = setupFileReader.readLine();
+            //System.out.println(currentLine);
+            if (currentLine == null) {
+                System.err.println("Cannot find number of processes, exiting.");
+                setupFileReader.close();
+                return;
+            }
+            else {
+                for(int i = 0; i < currentLine.split(" ").length; i++){
+                    int num = Integer.parseInt(currentLine.split(" ")[i]);
+                    available[i] = num;
+                }
+                
+            }
+            for(int i = 0; i < available.length; i++){
+                System.out.print(available[i] + " ");
+            }
+
+            currentLine = setupFileReader.readLine();
+            System.out.println("\n" +currentLine);
+
+            for(int i = 0; i < max.length; i++){
+                currentLine = setupFileReader.readLine();
+                //System.out.println(currentLine);
+                for(int j = 0; j < currentLine.split(" ").length; j++){
+                    int num = Integer.parseInt(currentLine.split(" ")[j]);
+                    max[i][j] = num;
+                }
+            }
+            
+
+            currentLine = setupFileReader.readLine();
+            System.out.println("\n" +currentLine);
+
+            for(int i = 0; i < allocation.length; i++){
+                currentLine = setupFileReader.readLine();
+                //System.out.println(currentLine);
+                for(int j = 0; j < currentLine.split(" ").length; j++){
+                    int num = Integer.parseInt(currentLine.split(" ")[j]);
+                    allocation[i][j] = num;
+                }
+            }
+            
+
+
 
             // 3. Use the rest of the setup file to initialize the
             // data structures
@@ -113,6 +182,71 @@ public class Program3 {
         // 4. Check initial conditions to ensure that the system is 
         // beginning in a safe state: see "Check initial conditions"
         // in the Program 3 instructions
+        
+        //print available
+        System.out.println("Printing available data structure");
+        for(int i = 0; i < available.length; i++){
+            System.out.print(available[i] + " ");
+        }
+
+        //print max
+        System.out.println("\nprinting max data structure");
+        for(int i = 0; i < max.length; i++){
+            for(int j = 0; j < max[i].length; j++){
+                System.out.print(max[i][j] + " ");
+            }
+            System.out.println("");
+        }
+
+        //print allocation
+        System.out.println("printing allocation data structure");
+        for(int i = 0; i < allocation.length; i++){
+            for(int j = 0; j < allocation[i].length; j++){
+                System.out.print(allocation[i][j] + " ");
+            }
+            System.out.println("");
+        }
+
+        //print need
+        System.out.println("Printing need data structure");
+        int[][] need = new int[numProcesses][numResources];
+            for(int i = 0; i < need.length; i++){
+                for(int j = 0; j < need[i].length; j++){
+                    need[i][j] = max[i][j] - allocation[i][j];
+                }
+            }
+            for(int i = 0; i < need.length; i++){
+                for(int j = 0; j < need[i].length; j++){
+                    System.out.print(need[i][j] + " ");
+                }
+                System.out.println("");
+            }
+
+            int[] work = available;
+            System.out.println("printing work data structure");
+            for(int i = 0; i < work.length; i++){
+                System.out.print(work[i] + " ");
+            }
+
+            boolean[] finish = new boolean[numProcesses];
+            for(int i = 0; i < finish.length; i++){
+                finish[i] = false;
+            }
+
+            System.out.println("\nPrinting finish data structure");
+            for(int i = 0; i < finish.length; i++){
+                System.out.print(finish[i] + " ");
+            }
+
+            if(args[0].equals("manual")){
+                playManual();
+            }else{
+                playAutomatic();
+            }
+
+
+    }
+        
 
         // 5. Go into either manual or automatic mode, depending on
         // the value of args[0]; you could implement these two modes
@@ -120,6 +254,32 @@ public class Program3 {
         // with their own main methods, or as additional code within
         // this main method.
 
+        
+    public static void playManual(){
+
+        System.out.println("\nEnter commands and exit by typing end");
+        Scanner sc = new Scanner(System.in);
+        String userIn = sc.nextLine();
+        while(!(userIn.equals("end"))){
+            String command = userIn.split(" ")[0];
+            int ele = Integer.parseInt(userIn.split(" ")[1]);
+            int resource = Integer.parseInt(userIn.split(" ")[3]);
+            int process = Integer.parseInt(userIn.split(" ")[5]);
+            //calculateNeed();
+            System.out.println(command + " " + ele + " " + resource + " " + process);
+            isSafe(command, ele, resource, process);
+            userIn = sc.nextLine();
+        }
+    }
+
+    public static void playAutomatic(){
 
     }
-}
+
+    public static void isSafe(String com, int res, int pro, int avail){
+
+    }
+
+    }
+
+
