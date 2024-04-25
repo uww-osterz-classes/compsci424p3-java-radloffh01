@@ -42,7 +42,10 @@ public class Program3 {
      * - For Test Case 2, use "424-p3-test2.txt".
      * 
      */
-    int[][] need;
+    // int[][] need;
+    // int[][] max;
+    // int[] available;
+    // int[][] allocation;
     public static void main(String[] args) {
         // Code to test command-line argument processing.
         // You can keep, modify, or remove this. It's not required.
@@ -63,9 +66,9 @@ public class Program3 {
         // 1. Open the setup file using the path in args[1]
         String currentLine;
         BufferedReader setupFileReader;
-        int[] available;
-        int[][] max;
-        int[][] allocation;
+         int[] available;
+         int[][] max;
+         int[][] allocation;
         
 
 
@@ -222,24 +225,24 @@ public class Program3 {
                 System.out.println("");
             }
 
-            int[] work = available;
-            System.out.println("printing work data structure");
-            for(int i = 0; i < work.length; i++){
-                System.out.print(work[i] + " ");
-            }
+            // int[] work = available;
+            // System.out.println("printing work data structure");
+            // for(int i = 0; i < work.length; i++){
+            //     System.out.print(work[i] + " ");
+            // }
 
-            boolean[] finish = new boolean[numProcesses];
-            for(int i = 0; i < finish.length; i++){
-                finish[i] = false;
-            }
+            // boolean[] finish = new boolean[numProcesses];
+            // for(int i = 0; i < finish.length; i++){
+            //     finish[i] = false;
+            // }
 
-            System.out.println("\nPrinting finish data structure");
-            for(int i = 0; i < finish.length; i++){
-                System.out.print(finish[i] + " ");
-            }
+            // System.out.println("\nPrinting finish data structure");
+            // for(int i = 0; i < finish.length; i++){
+            //     System.out.print(finish[i] + " ");
+            // }
 
             if(args[0].equals("manual")){
-                playManual();
+                playManual(max, allocation, available);
             }else{
                 playAutomatic();
             }
@@ -255,7 +258,7 @@ public class Program3 {
         // this main method.
 
         
-    public static void playManual(){
+    public static void playManual(int[][] m, int[][] allo, int[] avail){
 
         System.out.println("\nEnter commands and exit by typing end");
         Scanner sc = new Scanner(System.in);
@@ -267,17 +270,111 @@ public class Program3 {
             int process = Integer.parseInt(userIn.split(" ")[5]);
             //calculateNeed();
             System.out.println(command + " " + ele + " " + resource + " " + process);
-            isSafe(command, ele, resource, process);
+            isSafe(command, ele, resource, process, m, avail, allo, m.length, m[0].length);
             userIn = sc.nextLine();
         }
+        sc.close();
     }
 
     public static void playAutomatic(){
 
     }
 
-    public static void isSafe(String com, int res, int pro, int avail){
+    public static void isSafe(String com, int ele, int res, int pro, int[][] m, int[] a, int[][] allo, int numP, int numR){
+        int count=0;
+        // if(com.equals("request")){
+        //     allo[pro][res] += ele;
+        // }else{
+        //     allo[pro][res] -= ele;
+        // }
+     
+    //visited array to find the already allocated process
+    boolean finish[] = new boolean[numP]; 
+    for (int i = 0;i < numP; i++)
+    {
+        finish[i] = false;
+    }
+         
+    //work array to store the copy of available resources
+    int work[] = new int[numR];    
+    for (int i = 0;i < numR; i++)
+    {
+        work[i] = a[i];
+    }
+    
+    int[][] need = new int[numP][numR];
+            for(int i = 0; i < need.length; i++){
+                for(int j = 0; j < need[i].length; j++){
+                    need[i][j] = m[i][j] - allo[i][j];
+                }
+            }
+            if(com.equals("request")){
+                allo[pro][res] += ele;
+            }else{
+                allo[pro][res] -= ele;
+            }
 
+            for(int i = 0; i < allo.length; i++){
+                for(int j = 0; j < allo[i].length; j++){
+                    System.out.print(allo[i][j] + " ");
+                }
+                System.out.println("");
+            }
+
+            // if(a[res] - ele < 0){
+            //     System.out.println("System is Unsafe");
+            // }else
+            // if(allo[pro][res] > m[pro][res]){
+            //     System.out.println("System is Unsafe");
+            // }else{
+            //     System.out.println("System is Safe");
+            // }
+
+            while (count<numP)
+    {
+        boolean flag = false;
+        for (int i = 0;i < numP; i++)
+        {
+            if (finish[i] == false)
+             {
+            int j;
+            for (j = 0;j < numR; j++)
+            {        
+                if (need[i][j] > work[j]){
+                //System.out.println("failed first break");
+                break;
+                }
+            }
+            //System.out.println(j);
+            if (j == numR)
+            {
+                //System.out.println("Entered j if");
+               count++;
+               finish[i]=true;
+               flag=true;
+                         
+                for (j = 0;j < numR; j++)
+                {
+                work[j] = work[j]+allo[i][j];
+                }
+            }
+             }
+        }
+        if (flag == false)
+        {
+            break;
+        }
+    }
+    if (count < numP || allo[pro][res] < need[pro][res])
+    {
+        System.out.println("The System is UnSafe!");
+    }
+    else
+    {
+        System.out.println("The given System is Safe");         
+        
+    }
+   
     }
 
     }
