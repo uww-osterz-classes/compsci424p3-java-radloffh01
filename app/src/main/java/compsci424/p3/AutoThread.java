@@ -42,7 +42,7 @@ public class AutoThread implements Runnable{
             //synchronized(buffer){
                 sem.tryAcquire();
                 int res = resource;
-                int pro = (int)(Math.random() * max[1].length) + 1;
+                int pro = (int)(Math.random() * max.length) + 1;
                 int units = (int)(Math.random() * 5) + 1;
 
                 isSafe("request", units, res, pro, max, available, allocate, max.length, max[0].length);
