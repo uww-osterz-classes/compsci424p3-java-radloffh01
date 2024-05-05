@@ -18,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Scanner;
+import java.util.concurrent.Semaphore;
 
 /**
  * Main class for this program. To help you get started, the major
@@ -50,8 +51,8 @@ public class Program3 {
         // Code to test command-line argument processing.
         // You can keep, modify, or remove this. It's not required.
 
-        args[0] = "manual";
-        //args[0] = "auto";
+        //args[0] = "manual";
+        args[0] = "auto";
 
         args[1] = "424-p3-test1.txt";
         //args[1] = "424-p3-test2.txt";
@@ -244,7 +245,7 @@ public class Program3 {
             if(args[0].equals("manual")){
                 playManual(max, allocation, available);
             }else{
-                playAutomatic();
+                playAutomatic(max, allocation, available);
             }
 
 
@@ -270,17 +271,31 @@ public class Program3 {
             int process = Integer.parseInt(userIn.split(" ")[5]);
             //calculateNeed();
             System.out.println(command + " " + ele + " " + resource + " " + process);
-            isSafe(command, ele, resource, process, m, avail, allo, m.length, m[0].length);
+            boolean result = isSafe(command, ele, resource, process, m, avail, allo, m.length, m[0].length);
+            if(result){
+                avail[resource] -= ele;
+                allo[process][resource] += ele;
+            }
             userIn = sc.nextLine();
         }
         sc.close();
     }
 
-    public static void playAutomatic(){
+    public static void playAutomatic(int[][] m, int[][] allo, int[] avail){
+        int threads = avail.length;
+        Semaphore sem = new Semaphore(1);
+        for(int i = 0; i < threads; i++){
+            int resource = i +1;
+            //AutoThread at = new AutoThread();
+            Thread obj = new Thread(new AutoThread(sem, m, allo, avail, resource));
+            obj.start();
+        }
 
     }
 
-    public static void isSafe(String com, int ele, int res, int pro, int[][] m, int[] a, int[][] allo, int numP, int numR){
+
+
+    public static boolean isSafe(String com, int ele, int res, int pro, int[][] m, int[] a, int[][] allo, int numP, int numR){
         int count=0;
         // if(com.equals("request")){
         //     allo[pro][res] += ele;
@@ -367,16 +382,21 @@ public class Program3 {
     }
     if (count < numP || allo[pro][res] < need[pro][res])
     {
-        System.out.println("The System is UnSafe!");
+        //System.out.println("The System is UnSafe!");
+        System.out.println("Process " + pro + " " + com + "s " + ele + " units of resource " + res + ": denied");
+        return false;
     }
     else
     {
-        System.out.println("The given System is Safe");         
+        //System.out.println("The given System is Safe");   
+        System.out.println("Process " + pro + " " + com + "s " + ele + " units of resource " + res + ": granted");   
+        return true;   
         
     }
    
     }
 
     }
+
 
 
