@@ -282,7 +282,7 @@ public class Program3 {
     }
 
     public static void playAutomatic(int[][] m, int[][] allo, int[] avail){
-        int threads = avail.length;
+        int threads = allo.length;
         Semaphore sem = new Semaphore(1);
         for(int i = 0; i < threads; i++){
             int resource = i +1;

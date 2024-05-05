@@ -5,18 +5,18 @@ import java.util.concurrent.Semaphore;
 public class AutoThread implements Runnable{
 
     private final Semaphore sem;
-    private final int[][] max;
-    private final int[][] allocate;
-    private final int[] available;
-    private final int resource;
+    private int[][] max;
+    private int[][] allocate;
+    private int[] available;
+    private final int process;
 
 
-    public AutoThread(Semaphore sema, int[][] m, int[][] allo, int[] avail, int res){
+    public AutoThread(Semaphore sema, int[][] m, int[][] allo, int[] avail, int pro){
         this.sem = sema;
         this.max = m;
         this.allocate = allo;
         this.available = avail;
-        this.resource = res;
+        this.process = pro;
     }
     public void run()
     {
@@ -41,12 +41,15 @@ public class AutoThread implements Runnable{
         while(true){
             //synchronized(buffer){
                 sem.tryAcquire();
-                int res = resource;
-                int pro = (int)(Math.random() * max.length) + 1;
+                int res = (int)(Math.random() * available.length) + 1;
+                int pro = process;
                 int units = (int)(Math.random() * 5) + 1;
 
-                isSafe("request", units, res, pro, max, available, allocate, max.length, max[0].length);
-                
+                boolean result = isSafe("request", units, res, pro, max, available, allocate, max.length, max[0].length);
+                if(result){
+                    available[res] -= units;
+                    allocate[pro][res] += units;
+                }
                 
                 //notify();
                 if(sem.availablePermits() == 0){
@@ -64,8 +67,8 @@ public class AutoThread implements Runnable{
         while(true){
             //synchronized(buffer){
                 sem.tryAcquire();
-                int res = resource;
-                int pro = (int)(Math.random() * max[1].length) + 1;
+                int res = (int)(Math.random() * available.length) + 1;
+                int pro = process;
                 int units = (int)(Math.random() * 5) + 1;
 
                 boolean result = isSafe("release", units, res, pro, max, available, allocate, max.length, max[0].length);
@@ -79,7 +82,7 @@ public class AutoThread implements Runnable{
                     sem.release(1);
                 }
                 //sem.release();
-                Thread.sleep(100);
+                Thread.sleep(1000);
                 break;
             } 
             
